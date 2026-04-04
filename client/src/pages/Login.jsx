@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from '../components/Toast';
+import config from '../config';
 import './Login.css';
 
 const ROLE_REDIRECT = {
@@ -22,7 +23,7 @@ export default function Login() {
     if (!email || !password) { toast('Please enter email and password', 'error'); return; }
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${config.API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -121,7 +122,7 @@ export default function Login() {
                 onClick={async () => {
                   setLoading(true);
                   try {
-                    const res = await fetch('http://localhost:5000/api/auth/login', {
+                    const res = await fetch(`${config.API_URL}/api/auth/login`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ email: 'driver@amt.com', password: 'driver123' }),

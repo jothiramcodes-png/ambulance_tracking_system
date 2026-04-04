@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { toast } from '../../components/Toast';
+import config from '../../config';
 
 const AMBULANCES = [
   { ambulanceId: 'AMB_101', vehicleNo: 'MH-01-AX-1234', driverName: 'Ravi Kumar' },
@@ -31,7 +32,7 @@ export default function Dispatch() {
     if (!form.patientCondition) { toast('Enter patient condition', 'error'); return; }
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/ambulance/dispatch', {
+      const res = await fetch(`${config.API_URL}/api/ambulance/dispatch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ...form, patientInfo: { age: form.patientAge, condition: form.patientCondition, notes: form.notes } }),
