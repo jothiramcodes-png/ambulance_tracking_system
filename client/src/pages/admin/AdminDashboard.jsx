@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import './AdminDashboard.css';
@@ -9,6 +9,48 @@ export default function AdminDashboard() {
   const [ambulances, setAmbulances] = useState([]);
   const [junctions, setJunctions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showNewDriverModal, setShowNewDriverModal] = useState(false);
+  const [driverForm, setDriverForm] = useState({ driverName: '', driverPhone: '', vehicleNo: '', email: '', password: '' });
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const resetModal = () => {
+    setShowNewDriverModal(false);
+    setDriverForm({ driverName: '', driverPhone: '', vehicleNo: '', email: '', password: '' });
+    setFormError('');
+    setFormSuccess('');
+  };
+
+  const handleDriverSubmit = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    setFormSuccess('');
+    if (!driverForm.driverName || !driverForm.driverPhone || !driverForm.vehicleNo) {
+      setFormError('Please fill in all required fields');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch('http://localhost:5000/api/ambulance/add-driver', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(driverForm),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to add driver');
+      setFormSuccess(`✅ ${data.ambulance.driverName} added as ${data.ambulance.ambulanceId}`);
+      // Refresh ambulances list
+      const ambRes = await fetch('http://localhost:5000/api/ambulance', { headers: { Authorization: `Bearer ${token}` } });
+      const ambData = await ambRes.json();
+      setAmbulances(ambData.ambulances || []);
+      setTimeout(() => resetModal(), 1800);
+    } catch (err) {
+      setFormError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const headers = { Authorization: `Bearer ${token}` };
@@ -38,6 +80,14 @@ export default function AdminDashboard() {
           <p className="dashboard-date">{now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
         </div>
         <div className="header-badges">
+          <button
+            id="btn-new-ambulance-driver"
+            className="btn-new-driver"
+            onClick={() => setShowNewDriverModal(true)}
+          >
+            <span className="btn-new-driver-icon">➕</span>
+            New Ambulance Driver
+          </button>
           <div className={`conn-badge ${connected ? 'online' : 'offline'}`}>
             <span className={`pulse-dot ${connected ? 'green' : 'red'}`} />
             {connected ? 'Live Feed Active' : 'Reconnecting...'}
@@ -177,6 +227,88 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* ── New Ambulance Driver Modal ── */}
+      {showNewDriverModal && (
+        <div className="modal-overlay" onClick={resetModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>🚑 Add New Ambulance Driver</h3>
+              <button className="modal-close" onClick={resetModal}>✕</button>
+            </div>
+
+            <form onSubmit={handleDriverSubmit} className="modal-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Driver Name *</label>
+                  <input
+                    id="input-driver-name"
+                    className="form-input"
+                    placeholder="e.g. Ravi Kumar"
+                    value={driverForm.driverName}
+                    onChange={e => setDriverForm(p => ({ ...p, driverName: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Phone Number *</label>
+                  <input
+                    id="input-driver-phone"
+                    className="form-input"
+                    placeholder="e.g. 9876543210"
+                    value={driverForm.driverPhone}
+                    onChange={e => setDriverForm(p => ({ ...p, driverPhone: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Vehicle Number *</label>
+                  <input
+                    id="input-vehicle-no"
+                    className="form-input"
+                    placeholder="e.g. MH-01-AX-1234"
+                    value={driverForm.vehicleNo}
+                    onChange={e => setDriverForm(p => ({ ...p, vehicleNo: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email (optional)</label>
+                  <input
+                    id="input-driver-email"
+                    className="form-input"
+                    placeholder="e.g. driver@amt.com"
+                    value={driverForm.email}
+                    onChange={e => setDriverForm(p => ({ ...p, email: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Password (optional – for login)</label>
+                <input
+                  id="input-driver-password"
+                  className="form-input"
+                  type="password"
+                  placeholder="Set a login password"
+                  value={driverForm.password}
+                  onChange={e => setDriverForm(p => ({ ...p, password: e.target.value }))}
+                />
+              </div>
+
+              {formError && <div className="modal-msg modal-msg-error">{formError}</div>}
+              {formSuccess && <div className="modal-msg modal-msg-success">{formSuccess}</div>}
+
+              <div className="modal-actions">
+                <button type="button" className="btn btn-ghost" onClick={resetModal}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                  {submitting ? <><span className="spinner" /> Adding...</> : '🚑 Add Driver'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

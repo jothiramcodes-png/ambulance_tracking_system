@@ -38,6 +38,13 @@ export default function DriverDashboard() {
     setTracking(true);
     let startLoc = location;
 
+    // Set status to en-route on server so hospital sees us
+    fetch('http://localhost:5000/api/ambulance/update-status', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ ambulanceId: user?.ambulanceId, status: 'en-route' })
+    }).catch(console.error);
+
     // If we don't have location yet, wait for IP API fetch
     if (!startLoc || !startLoc.lat) {
       toast('Fetching real location via GeoJS...', 'info');
@@ -77,6 +84,14 @@ export default function DriverDashboard() {
     if (watchRef.current) navigator.geolocation.clearWatch(watchRef.current);
     if (intervalRef.current) clearInterval(intervalRef.current);
     setTracking(false);
+
+    // Reset status to idle so we disappear from hospital dashboard
+    fetch('http://localhost:5000/api/ambulance/update-status', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ ambulanceId: user?.ambulanceId, status: 'idle' })
+    }).catch(console.error);
+
     toast('🛑 Tracking stopped', 'info');
   };
 

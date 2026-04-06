@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from '../components/Toast';
@@ -11,12 +11,33 @@ const ROLE_REDIRECT = {
   ambulance_driver: '/driver',
 };
 
+const FALLBACK_DRIVERS = [
+  { driverName: 'Ravi Kumar', email: 'driver@amt.com', ambulanceId: 'AMB_101' },
+  { driverName: 'Suresh Patel', email: 'suresh@amt.com', ambulanceId: 'AMB_102' },
+  { driverName: 'Amit Singh', email: 'amit@amt.com', ambulanceId: 'AMB_103' },
+];
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [drivers, setDrivers] = useState(FALLBACK_DRIVERS);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Fetch live driver list so newly added drivers appear automatically
+  useEffect(() => {
+    const fetchDrivers = () => {
+      fetch(`${config.API_URL}/api/ambulance/drivers-public`)
+        .then(r => r.json())
+        .then(data => { if (data.drivers?.length) setDrivers(data.drivers); })
+        .catch(() => {}); // silently fall back to FALLBACK_DRIVERS
+    };
+
+    fetchDrivers();
+    const interval = setInterval(fetchDrivers, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +54,26 @@ export default function Login() {
       login(data.token, data.user);
       toast(`Welcome back, ${data.user.name}!`, 'success');
       navigate(ROLE_REDIRECT[data.user.role] || '/admin');
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFastLogin = async (driver) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${config.API_URL}/api/auth/fast-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ambulanceId: driver.ambulanceId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Login failed');
+      login(data.token, data.user);
+      toast(`Signed in as ${driver.driverName}`, 'success');
+      navigate('/driver');
     } catch (err) {
       toast(err.message, 'error');
     } finally {
@@ -115,31 +156,28 @@ export default function Login() {
                 {loading ? <><span className="spinner" /> Signing in...</> : <><span>🔐</span> Sign In</>}
               </button>
 
-              <button 
-                type="button" 
-                className="btn btn-ghost" 
-                style={{ width: '100%', marginTop: '0.5rem', color: 'var(--accent-red)', borderColor: 'rgba(255, 62, 94, 0.3)' }} 
-                onClick={async () => {
-                  setLoading(true);
-                  try {
-                    const res = await fetch(`${config.API_URL}/api/auth/login`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email: 'driver@amt.com', password: 'driver123' }),
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'Login failed');
-                    login(data.token, data.user);
-                    navigate('/driver');
-                  } catch (err) {
-                    toast(err.message, 'error');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-              >
-                ⚡ Fast Login as Driver
-              </button>
+              {/* Fast Login - All Drivers (dynamic) */}
+              <div className="fast-login-section">
+                <div className="fast-login-label">⚡ Fast Login as Driver</div>
+                <div className="fast-login-list">
+                  {drivers.map(driver => (
+                    <button
+                      key={driver.ambulanceId}
+                      type="button"
+                      className="fast-login-item"
+                      disabled={loading}
+                      onClick={() => handleFastLogin(driver)}
+                    >
+                      <span className="fli-icon">🚑</span>
+                      <div className="fli-info">
+                        <span className="fli-name">{driver.driverName}</span>
+                        <span className="fli-id">{driver.ambulanceId}</span>
+                      </div>
+                      <span className="fli-arrow">→</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </form>
           </div>
         </div>

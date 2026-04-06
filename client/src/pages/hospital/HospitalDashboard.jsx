@@ -11,11 +11,17 @@ export default function HospitalDashboard() {
   const [marking, setMarking] = useState({});
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/hospital/incoming', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => setIncoming(d.incoming || []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    const fetchIncoming = () => {
+      fetch('http://localhost:5000/api/hospital/incoming', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(d => setIncoming(d.incoming || []))
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    };
+
+    fetchIncoming();
+    const interval = setInterval(fetchIncoming, 5000);
+    return () => clearInterval(interval);
   }, [token]);
 
   const markReady = async (alertId) => {

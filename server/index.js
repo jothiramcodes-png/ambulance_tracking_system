@@ -26,7 +26,7 @@ if (MONGO_URI) {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/ambulance', require('./routes/ambulance'));
+app.use('/api/ambulance', require('./routes/ambulance').router);
 app.use('/api/traffic', require('./routes/traffic'));
 app.use('/api/hospital', require('./routes/hospital'));
 

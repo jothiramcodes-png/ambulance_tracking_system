@@ -1,0 +1,107 @@
+[
+  {
+    "ambulanceId": "AMB_101",
+    "vehicleNo": "MH-01-AX-1234",
+    "driverName": "Ravi Kumar",
+    "driverPhone": "9876543210",
+    "email": "driver@amt.com",
+    "password": "driver123",
+    "currentLocation": {
+      "lat": 19.076,
+      "lng": 72.8777
+    },
+    "status": "idle",
+    "assignedHospital": null
+  },
+  {
+    "ambulanceId": "AMB_102",
+    "vehicleNo": "MH-02-BY-5678",
+    "driverName": "Suresh Patel",
+    "driverPhone": "9876543211",
+    "email": "suresh@amt.com",
+    "password": "driver123",
+    "currentLocation": {
+      "lat": 19.09,
+      "lng": 72.865
+    },
+    "status": "idle",
+    "assignedHospital": null
+  },
+  {
+    "ambulanceId": "AMB_103",
+    "vehicleNo": "MH-03-CZ-9012",
+    "driverName": "Amit Singh",
+    "driverPhone": "9876543212",
+    "email": "amit@amt.com",
+    "password": "driver123",
+    "currentLocation": {
+      "lat": 19.065,
+      "lng": 72.89
+    },
+    "status": "idle",
+    "assignedHospital": null
+  },
+  {
+    "ambulanceId": "AMB_104",
+    "vehicleNo": "MS-34-4356",
+    "driverName": "joe",
+    "driverPhone": "46667886535",
+    "email": "",
+    "password": "driver123",
+    "currentLocation": {
+      "lat": 19.076,
+      "lng": 72.8777
+    },
+    "status": "en-route",
+    "assignedHospital": null,
+    "createdAt": "2026-04-06T19:49:57.478Z",
+    "lastUpdated": "2026-04-06T20:04:02.472Z"
+  },
+  {
+    "ambulanceId": "AMB_105",
+    "vehicleNo": "MS-3-4356",
+    "driverName": "joe2",
+    "driverPhone": "44993939393",
+    "email": "-",
+    "password": "-",
+    "currentLocation": {
+      "lat": 19.076,
+      "lng": 72.8777
+    },
+    "status": "idle",
+    "assignedHospital": null,
+    "createdAt": "2026-04-06T19:59:11.736Z"
+  },
+  {
+    "ambulanceId": "AMB_106",
+    "vehicleNo": "MS-3-4357",
+    "driverName": "kavi",
+    "driverPhone": "3849394924",
+    "email": "driver_ij2qw@amt.com",
+    "password": "driver123",
+    "currentLocation": {
+      "lat": 19.076,
+      "lng": 72.8777
+    },
+    "status": "en-route",
+    "assignedHospital": null,
+    "createdAt": "2026-04-06T20:06:11.030Z",
+    "lastUpdated": "2026-04-06T20:06:21.905Z"
+  },
+  {
+    "ambulanceId": "AMB_107",
+    "vehicleNo": "MS-3-4359",
+    "driverName": "queen",
+    "driverPhone": "56779754",
+    "email": "driver_v1mc7oh@amt.com",
+    "password": "driver123",
+    "currentLocation": {
+      "lat": 19.076,
+      "lng": 72.8777
+    },
+    "status": "en-route",
+    "assignedHospital": null,
+    "createdAt": "2026-04-06T21:00:30.115Z",
+    "lastUpdated": "2026-04-06T21:00:53.517Z"
+  }
+]

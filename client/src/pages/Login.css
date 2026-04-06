@@ -238,3 +238,90 @@
   text-align: center;
   margin: 0;
 }
+
+/* ── Fast Login Section ── */
+.fast-login-section {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fast-login-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.fast-login-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fast-login-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.fast-login-item:hover {
+  background: rgba(255, 62, 94, 0.08);
+  border-color: var(--accent-red);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(255, 62, 94, 0.15);
+}
+
+.fast-login-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.fli-icon {
+  font-size: 1.3rem;
+}
+
+.fli-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.fli-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fli-id {
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  color: var(--accent-red);
+  letter-spacing: 0.02em;
+}
+
+.fli-arrow {
+  font-size: 1rem;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.fast-login-item:hover .fli-arrow {
+  color: var(--accent-red);
+  transform: translateX(3px);
+}

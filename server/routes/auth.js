@@ -9,6 +9,8 @@ const DEMO_USERS = [
   { id: '1', name: 'Admin User', email: 'admin@amt.com', password: 'admin123', role: 'admin' },
   { id: '2', name: 'Dr. Sharma', email: 'hospital@amt.com', password: 'hospital123', role: 'hospital_staff', hospitalId: 'HOSP_01' },
   { id: '3', name: 'Driver Ravi', email: 'driver@amt.com', password: 'driver123', role: 'ambulance_driver', ambulanceId: 'AMB_101' },
+  { id: '4', name: 'Driver Suresh', email: 'suresh@amt.com', password: 'driver123', role: 'ambulance_driver', ambulanceId: 'AMB_102' },
+  { id: '5', name: 'Driver Amit', email: 'amit@amt.com', password: 'driver123', role: 'ambulance_driver', ambulanceId: 'AMB_103' },
 ];
 
 const JWT_SECRET = process.env.JWT_SECRET || 'amt_secret_key';
@@ -18,7 +20,7 @@ const User = require('../models/User');
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  
+
   try {
     // Try hitting the Database first
     if (mongoose.connection.readyState === 1) {
@@ -36,8 +38,24 @@ router.post('/login', async (req, res) => {
     console.error('DB Login Error:', err);
   }
 
-  // Fallback to Demo Users
-  const user = DEMO_USERS.find(u => u.email === email);
+  // Fallback to Demo Users & Dynamic Ambulance Store
+  const { ambulances } = require('./ambulance');
+  let user = DEMO_USERS.find(u => u.email === email);
+  
+  if (!user && email) {
+    const ambUser = ambulances.find(a => a.email === email);
+    if (ambUser) {
+      user = { 
+        id: ambUser.ambulanceId, 
+        name: ambUser.driverName, 
+        email: ambUser.email, 
+        password: ambUser.password || 'driver123', 
+        role: 'ambulance_driver', 
+        ambulanceId: ambUser.ambulanceId 
+      };
+    }
+  }
+
   if (!user || user.password !== password) {
     return res.status(401).json({ message: 'Invalid email or password' });
   }
@@ -47,6 +65,32 @@ router.post('/login', async (req, res) => {
     { expiresIn: '24h' }
   );
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, ambulanceId: user.ambulanceId } });
+});
+
+// POST /api/auth/fast-login - Dedicated endpoint for driver fast login
+router.post('/fast-login', (req, res) => {
+  const { ambulanceId } = req.body;
+  const { ambulances } = require('./ambulance');
+  
+  const ambUser = ambulances.find(a => a.ambulanceId === ambulanceId);
+  if (!ambUser) {
+    return res.status(404).json({ message: 'Driver not found' });
+  }
+
+  const user = {
+    id: ambUser.ambulanceId,
+    name: ambUser.driverName,
+    email: ambUser.email || `${ambUser.ambulanceId}@amt.com`,
+    role: 'ambulance_driver',
+    ambulanceId: ambUser.ambulanceId
+  };
+
+  const token = jwt.sign(
+    { id: user.id, name: user.name, email: user.email, role: user.role, ambulanceId: user.ambulanceId },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+  res.json({ token, user });
 });
 
 // POST /api/auth/register (admin only in production)
