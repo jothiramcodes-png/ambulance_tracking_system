@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import config from '../../config';
 import { useSocket } from '../../context/SocketContext';
 import { toast } from '../../components/Toast';
 
@@ -12,7 +13,7 @@ export default function HospitalDashboard() {
 
   useEffect(() => {
     const fetchIncoming = () => {
-      fetch('http://localhost:5000/api/hospital/incoming', { headers: { Authorization: `Bearer ${token}` } })
+      fetch(`${config.API_URL}/api/hospital/incoming`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.json())
         .then(d => setIncoming(d.incoming || []))
         .catch(console.error)
@@ -27,7 +28,7 @@ export default function HospitalDashboard() {
   const markReady = async (alertId) => {
     setMarking(p => ({ ...p, [alertId]: true }));
     try {
-      const res = await fetch(`http://localhost:5000/api/hospital/ready/${alertId}`, {
+      const res = await fetch(`${config.API_URL}/api/hospital/ready/${alertId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });

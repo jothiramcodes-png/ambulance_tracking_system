@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { toast } from '../../components/Toast';
+import config from '../../config';
 
 export default function TrafficControl() {
   const { token } = useAuth();
@@ -11,7 +12,7 @@ export default function TrafficControl() {
   const [overriding, setOverriding] = useState({});
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/traffic/junctions', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${config.API_URL}/api/traffic/junctions`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => setJunctions(d.junctions || []))
       .catch(console.error)
@@ -21,7 +22,7 @@ export default function TrafficControl() {
   const override = async (junctionId, junctionName, status) => {
     setOverriding(p => ({ ...p, [junctionId]: true }));
     try {
-      const res = await fetch('http://localhost:5000/api/traffic/override', {
+      const res = await fetch(`${config.API_URL}/api/traffic/override`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ junctionId, status }),
@@ -47,7 +48,7 @@ export default function TrafficControl() {
   const reset = async (junctionId) => {
     setOverriding(p => ({ ...p, [junctionId]: true }));
     try {
-      await fetch(`http://localhost:5000/api/traffic/reset/${junctionId}`, {
+      await fetch(`${config.API_URL}/api/traffic/reset/${junctionId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });

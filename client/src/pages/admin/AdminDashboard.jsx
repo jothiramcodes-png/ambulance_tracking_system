@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
+import config from '../../config';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
@@ -32,16 +33,20 @@ export default function AdminDashboard() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/ambulance/add-driver', {
+      const res = await fetch(`${config.API_URL}/api/ambulance/add-driver`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(driverForm),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to add driver');
+      if (!res.ok) {
+        // Capture detailed error if available
+        const errorMsg = data.details ? `${data.message}: ${data.details}` : (data.message || 'Failed to add driver');
+        throw new Error(errorMsg);
+      }
       setFormSuccess(`✅ ${data.ambulance.driverName} added as ${data.ambulance.ambulanceId}`);
       // Refresh ambulances list
-      const ambRes = await fetch('http://localhost:5000/api/ambulance', { headers: { Authorization: `Bearer ${token}` } });
+      const ambRes = await fetch(`${config.API_URL}/api/ambulance`, { headers: { Authorization: `Bearer ${token}` } });
       const ambData = await ambRes.json();
       setAmbulances(ambData.ambulances || []);
       setTimeout(() => resetModal(), 1800);
@@ -55,8 +60,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     const headers = { Authorization: `Bearer ${token}` };
     Promise.all([
-      fetch('http://localhost:5000/api/ambulance', { headers }).then(r => r.json()),
-      fetch('http://localhost:5000/api/traffic/junctions', { headers }).then(r => r.json()),
+      fetch(`${config.API_URL}/api/ambulance`, { headers }).then(r => r.json()),
+      fetch(`${config.API_URL}/api/traffic/junctions`, { headers }).then(r => r.json()),
     ]).then(([ambData, jctData]) => {
       setAmbulances(ambData.ambulances || []);
       setJunctions(jctData.junctions || []);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { toast } from '../../components/Toast';
+import config from '../../config';
 
 export default function FleetManagement() {
   const { token } = useAuth();
@@ -11,7 +12,7 @@ export default function FleetManagement() {
   const [updating, setUpdating] = useState({});
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/ambulance', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${config.API_URL}/api/ambulance`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => setAmbulances(d.ambulances || []))
       .catch(console.error)
@@ -21,7 +22,7 @@ export default function FleetManagement() {
   const updateStatus = async (ambulanceId, status) => {
     setUpdating(p => ({ ...p, [ambulanceId]: true }));
     try {
-      const res = await fetch('http://localhost:5000/api/ambulance/update-status', {
+      const res = await fetch(`${config.API_URL}/api/ambulance/update-status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ambulanceId, status }),

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import config from '../../config';
 import { useSocket } from '../../context/SocketContext';
 import { toast } from '../../components/Toast';
 
@@ -39,7 +40,7 @@ export default function DriverDashboard() {
     let startLoc = location;
 
     // Set status to en-route on server so hospital sees us
-    fetch('http://localhost:5000/api/ambulance/update-status', {
+    fetch(`${config.API_URL}/api/ambulance/update-status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ ambulanceId: user?.ambulanceId, status: 'en-route' })
@@ -86,7 +87,7 @@ export default function DriverDashboard() {
     setTracking(false);
 
     // Reset status to idle so we disappear from hospital dashboard
-    fetch('http://localhost:5000/api/ambulance/update-status', {
+    fetch(`${config.API_URL}/api/ambulance/update-status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ ambulanceId: user?.ambulanceId, status: 'idle' })

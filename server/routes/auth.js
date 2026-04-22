@@ -39,20 +39,35 @@ router.post('/login', async (req, res) => {
   }
 
   // Fallback to Demo Users & Dynamic Ambulance Store
-  const { ambulances } = require('./ambulance');
+  const { localAmbulances } = require('./ambulance');
+  const supabase = require('../config/supabaseClient');
   let user = DEMO_USERS.find(u => u.email === email);
   
   if (!user && email) {
-    const ambUser = ambulances.find(a => a.email === email);
-    if (ambUser) {
-      user = { 
-        id: ambUser.ambulanceId, 
-        name: ambUser.driverName, 
-        email: ambUser.email, 
-        password: ambUser.password || 'driver123', 
-        role: 'ambulance_driver', 
-        ambulanceId: ambUser.ambulanceId 
-      };
+    if (supabase) {
+      const { data, error } = await supabase.from('ambulances').select('*').eq('email', email).single();
+      if (!error && data) {
+        user = { 
+          id: data.ambulanceId, 
+          name: data.driverName, 
+          email: data.email, 
+          password: data.password || 'driver123', 
+          role: 'ambulance_driver', 
+          ambulanceId: data.ambulanceId 
+        };
+      }
+    } else {
+      const ambUser = localAmbulances.find(a => a.email === email);
+      if (ambUser) {
+        user = { 
+          id: ambUser.ambulanceId, 
+          name: ambUser.driverName, 
+          email: ambUser.email, 
+          password: ambUser.password || 'driver123', 
+          role: 'ambulance_driver', 
+          ambulanceId: ambUser.ambulanceId 
+        };
+      }
     }
   }
 
@@ -68,11 +83,19 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /api/auth/fast-login - Dedicated endpoint for driver fast login
-router.post('/fast-login', (req, res) => {
+router.post('/fast-login', async (req, res) => {
   const { ambulanceId } = req.body;
-  const { ambulances } = require('./ambulance');
+  const { localAmbulances } = require('./ambulance');
+  const supabase = require('../config/supabaseClient');
   
-  const ambUser = ambulances.find(a => a.ambulanceId === ambulanceId);
+  let ambUser;
+  if (supabase) {
+    const { data, error } = await supabase.from('ambulances').select('*').eq('ambulanceId', ambulanceId).single();
+    if (!error && data) ambUser = data;
+  } else {
+    ambUser = localAmbulances.find(a => a.ambulanceId === ambulanceId);
+  }
+  
   if (!ambUser) {
     return res.status(404).json({ message: 'Driver not found' });
   }

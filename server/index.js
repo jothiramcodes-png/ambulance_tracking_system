@@ -3,7 +3,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const mongoose = require('mongoose');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const server = http.createServer(app);
@@ -31,9 +32,28 @@ app.use('/api/traffic', require('./routes/traffic'));
 app.use('/api/hospital', require('./routes/hospital'));
 
 // Health Check
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ status: '🚑 Smart Ambulance Tracking API is running', version: '1.0.0', time: new Date().toISOString() });
 });
+
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+  const clientPath = path.join(__dirname, '../client/dist');
+  app.use(express.static(clientPath));
+  
+  app.get('*', (req, res) => {
+    // Only serve index.html if it's not an API call
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(clientPath, 'index.html'));
+    } else {
+      res.status(404).json({ message: 'API Route Not Found' });
+    }
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.json({ status: '🚑 Smart Ambulance Tracking API is running (Dev)', version: '1.0.0' });
+  });
+}
 
 // ─── Socket.io Real-time Engine ────────────────────────────────────────────────
 const activeTrips = {};  // tripId -> trip data
