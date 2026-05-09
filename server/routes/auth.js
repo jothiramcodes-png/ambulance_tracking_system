@@ -45,18 +45,25 @@ router.post('/login', async (req, res) => {
   
   if (!user && email) {
     if (supabase) {
-      const { data, error } = await supabase.from('ambulances').select('*').eq('email', email).single();
-      if (!error && data) {
-        user = { 
-          id: data.ambulanceId, 
-          name: data.driverName, 
-          email: data.email, 
-          password: data.password || 'driver123', 
-          role: 'ambulance_driver', 
-          ambulanceId: data.ambulanceId 
-        };
+      try {
+        const { data, error } = await supabase.from('ambulances').select('*').eq('email', email).single();
+        if (!error && data) {
+          user = { 
+            id: data.ambulanceId, 
+            name: data.driverName, 
+            email: data.email, 
+            password: data.password || 'driver123', 
+            role: 'ambulance_driver', 
+            ambulanceId: data.ambulanceId 
+          };
+        }
+      } catch (err) {
+        console.error('Supabase login fetch error:', err.message);
       }
-    } else {
+    }
+    
+    // Fallback to local array if not found in Supabase or if Supabase failed
+    if (!user) {
       const ambUser = localAmbulances.find(a => a.email === email);
       if (ambUser) {
         user = { 
@@ -90,9 +97,15 @@ router.post('/fast-login', async (req, res) => {
   
   let ambUser;
   if (supabase) {
-    const { data, error } = await supabase.from('ambulances').select('*').eq('ambulanceId', ambulanceId).single();
-    if (!error && data) ambUser = data;
-  } else {
+    try {
+      const { data, error } = await supabase.from('ambulances').select('*').eq('ambulanceId', ambulanceId).single();
+      if (!error && data) ambUser = data;
+    } catch (err) {
+      console.error('Supabase fast-login fetch error:', err.message);
+    }
+  }
+  
+  if (!ambUser) {
     ambUser = localAmbulances.find(a => a.ambulanceId === ambulanceId);
   }
   

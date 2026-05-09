@@ -28,7 +28,7 @@ export default function Login() {
   // Fetch live driver list so newly added drivers appear automatically
   useEffect(() => {
     const fetchDrivers = () => {
-      fetch(`${config.API_URL}/api/ambulance/drivers-public`)
+      fetch(`${config.API_URL}/api/ambulance/drivers-public?t=${Date.now()}`, { cache: 'no-store' })
         .then(r => r.json())
         .then(data => { if (data.drivers?.length) setDrivers(data.drivers); })
         .catch(() => {}); // silently fall back to FALLBACK_DRIVERS
