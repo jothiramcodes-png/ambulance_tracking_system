@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -28,6 +29,7 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const { connected } = useSocket();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const items = navItems[user?.role] || [];
 
@@ -48,8 +50,8 @@ export default function Sidebar() {
     ambulance_driver: 'Ambulance Driver',
   };
 
-  return (
-    <aside className="sidebar">
+  const SidebarContent = () => (
+    <>
       {/* Logo */}
       <div className="sidebar-logo">
         <div className="logo-icon">🚑</div>
@@ -74,6 +76,7 @@ export default function Sidebar() {
             to={item.path}
             end={item.end}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => setMobileOpen(false)}
           >
             <span className="nav-icon">{item.icon}</span>
             <span className="nav-label">{item.label}</span>
@@ -94,6 +97,55 @@ export default function Sidebar() {
           ⏻
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* ── Desktop Sidebar ── */}
+      <aside className="sidebar desktop-sidebar">
+        <SidebarContent />
+      </aside>
+
+      {/* ── Mobile Top Navbar ── */}
+      <header className="mobile-navbar">
+        <div className="mobile-navbar-left">
+          <button
+            className="hamburger-btn"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+          >
+            ☰
+          </button>
+          <div className="mobile-brand">
+            <span className="mobile-brand-icon">🚑</span>
+            <span className="mobile-brand-name">AMT</span>
+          </div>
+        </div>
+        <div className="mobile-navbar-right">
+          <span className={`pulse-dot ${connected ? 'green' : 'red'}`} />
+          <button className="logout-btn" onClick={handleLogout} title="Logout">⏻</button>
+        </div>
+      </header>
+
+      {/* ── Mobile Drawer Overlay ── */}
+      {mobileOpen && (
+        <div className="mobile-overlay" onClick={() => setMobileOpen(false)} />
+      )}
+
+      {/* ── Mobile Drawer ── */}
+      <aside className={`sidebar mobile-drawer ${mobileOpen ? 'open' : ''}`}>
+        <div className="drawer-close-row">
+          <button
+            className="drawer-close-btn"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+          >
+            ✕
+          </button>
+        </div>
+        <SidebarContent />
+      </aside>
+    </>
   );
 }
