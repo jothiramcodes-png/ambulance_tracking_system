@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
   const clientPath = path.join(__dirname, '../client/dist');
   app.use(express.static(clientPath));
   
-  app.get('(.*)', (req, res) => {
+  app.get('/{*splat}', (req, res) => {
     // Only serve index.html if it's not an API call
     if (!req.path.startsWith('/api')) {
       res.sendFile(path.join(clientPath, 'index.html'));
