@@ -3,11 +3,11 @@
 set -o errexit
 
 echo "📦 Installing root dependencies..."
-npm install
+npm install --include=dev
 
 echo "🎨 Building Frontend..."
 cd client
-npm install
+npm install --include=dev
 npm run build
 
 echo "⚙️ Installing Backend dependencies..."
